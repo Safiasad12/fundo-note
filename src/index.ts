@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import logger from './config/logger';
 import morgan from 'morgan';
 import userRouter from './routes/user.routes';
+import noteRouter from './routes/note.routes';
 
 dotenv.config(); 
 const app = express();
@@ -31,6 +32,7 @@ app.use(morgan(morganFormate, {
 }));
 
 app.use('/api/user', userRouter);
+app.use('/api/note', noteRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

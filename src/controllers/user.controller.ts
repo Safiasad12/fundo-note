@@ -29,7 +29,6 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 export const refreshtoken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const data = await refreshToken(req.body);
-    console.log(data);
     res.status(200).json({
       newToken : data
     });
