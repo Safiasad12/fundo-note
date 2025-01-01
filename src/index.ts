@@ -4,7 +4,7 @@ import connectDB from './config/db.config';
 import dotenv from 'dotenv';
 import logger from './config/logger';
 import morgan from 'morgan';
-
+import userRouter from './routes/user.routes';
 
 dotenv.config(); 
 const app = express();
@@ -29,6 +29,8 @@ app.use(morgan(morganFormate, {
     }
   }
 }));
+
+app.use('/api/user', userRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
