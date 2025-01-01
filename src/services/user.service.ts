@@ -23,10 +23,12 @@ export const loginUser = async (credentials: { email: string; password: string }
     throw new Error('Invalid email or password');
   }
 
-  if(credentials.password===user.password) {
-    return { message: 'logged in successfully!', user};
-  } else {
-  throw new Error('Invalid email or password');
+
+  const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+  if (!isPasswordValid) {
+    throw new Error('Invalid email or password');
   }
+
+  return { message: 'logged in successfully!', user};
 
 };
