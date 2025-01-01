@@ -4,7 +4,9 @@ import { INote } from '../interface/note.interface';
 const NoteSchema: Schema = new Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
-  createdBy:{type: String}
+  createdBy:{type: String},
+  isArchive:{type: Boolean},
+  isTrash:{type: Boolean}
 }, {
   timestamps: true,
 });

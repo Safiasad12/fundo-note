@@ -55,7 +55,7 @@ export const updateNoteById = async (noteId: string, userId: any, updatedData: a
 
 export const deletePermanentlyById = async (noteId: string, userId: any): Promise<boolean> => {
   try {
-    const note = await Note.findOne({ _id: noteId, createdBy: userId});
+    const note = await Note.findOne({ _id: noteId, createdBy: userId, isTrash: true});
 
     if (!note) {
       throw new Error('Note not found or not authorized');
@@ -69,3 +69,37 @@ export const deletePermanentlyById = async (noteId: string, userId: any): Promis
   }
 };
 
+export const toggleArchiveById = async (noteId: string, userId: any): Promise<INote | null> => {
+  try {
+    const note = await Note.findOne({ _id: noteId , createdBy: userId }); 
+    
+    if (!note) {
+      throw new Error('Note not found or user not authorized'); 
+    }
+    
+    note.isArchive = !note.isArchive; 
+    await note.save();
+    return note;
+  } catch (error) {
+    console.error('Error in toggleArchive:', error); 
+    throw error;
+  }
+};
+
+export const toggleTrashById = async (noteId: string, userId: any): Promise<INote | null> => {
+  try {
+    const note = await Note.findOne({_id: noteId ,createdBy: userId });
+    if (!note) {
+      throw new Error('Note not found or user not authorized');
+    }
+    note.isTrash = !note.isTrash;
+    if (note.isTrash) {
+      note.isArchive = false;
+    }
+    await note.save(); 
+    return note;
+  } catch (error) {
+    console.error('Error in toggleTrash:', error);
+    throw error;
+  }
+};

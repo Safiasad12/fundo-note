@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import HttpStatus from "http-status-codes";
-import { createNote, getNoteById, getNotesByUserId, updateNoteById, deletePermanentlyById } from "../services/note.service";
+import { createNote, getNoteById, getNotesByUserId, updateNoteById, deletePermanentlyById, toggleArchiveById, toggleTrashById } from "../services/note.service";
 
 
 export const create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -96,6 +96,49 @@ export const deletePermanently = async (req: Request, res: Response, next: NextF
       code: HttpStatus.FORBIDDEN,
       message: 'Error updating note',
       error: (error as Error).message,
+    });
+  }
+};
+
+export const toggleArchive = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const noteId = req.params.id;
+    const userId = req.body.createdBy;
+
+    const note = await toggleArchiveById(noteId, userId);
+    if (note) {
+      res.status(HttpStatus.OK).json({
+        message: note.isArchive ? 'Note archived' : 'Note unarchived',
+        archivedNote: note
+      });
+    }
+  } catch (error) {
+    console.error('Error toggling archive status:', error);
+    next({
+      code: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: 'Error toggling archive status',
+      error: (error as Error).message
+    });
+  }
+};
+
+export const toggleTrash = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const noteId = req.params.id;
+    const userId = req.body.createdBy;
+    const note = await toggleTrashById(noteId, userId);
+    if (note) {
+      res.status(HttpStatus.OK).json({
+        message: note.isTrash ? 'Note moved to trash' : 'Note restored from trash',
+        trashedNote: note
+      });
+    }
+  } catch (error) {
+    console.error('Error toggling trash status:', error);
+    next({
+      code: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: 'Error toggling trash status',
+      error: (error as Error).message
     });
   }
 };
