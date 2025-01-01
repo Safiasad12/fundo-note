@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { registerUser, loginUser } from '../services/user.service';
+import { registerUser, loginUser, refreshToken } from '../services/user.service';
 
 
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -18,6 +18,20 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     const data = await loginUser(req.body);
     res.status(200).json({
       message: `${data.user.username} ${data.message}`,
+      token : data.token,
+      refreshtoken: data.refreshtoken
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const refreshtoken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const data = await refreshToken(req.body);
+    console.log(data);
+    res.status(200).json({
+      newToken : data
     });
   } catch (error) {
     next(error);
