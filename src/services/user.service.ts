@@ -5,7 +5,7 @@ import { generateJwt, verifyJwt } from '../utils/jwtUtils';
 import { ObjectId } from 'mongoose';
 import { connectRabbitMQ } from '../utils/rabbitmq';
 
-export const userRegister = async (userData: { username: string; email: string; password: string }): Promise<any> => {
+export const userRegister = async (userData: { firstname:string, lastname?: string, username: string; email: string; password: string }): Promise<any> => {
 
   const existingUser = await UserModel.findOne({ email: userData.email });
   if (existingUser) {

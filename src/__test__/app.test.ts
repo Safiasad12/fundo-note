@@ -16,7 +16,7 @@ describe('API Tests', () => {
   beforeAll(async () => {
     const mockUser = { email: "donkey@gmail.com", password: "donkey" };
     const res = await (request(app)
-      .post('/api/user/login')
+      .post('/api/v1/user/login')
       .send(mockUser));
     
     token = res.body.token;
@@ -27,10 +27,10 @@ describe('API Tests', () => {
   });
 
 
-  describe('POST /api/note', () => {
+  describe('POST /api/v1/note', () => {
     it('should create a new note successfully', async () => {
       const res = await request(app)
-        .post('/api/note')
+        .post('/api/v1/note')
         .set('Authorization', `Bearer ${token}`)
         .send({
           title: 'Test Note',
@@ -45,7 +45,7 @@ describe('API Tests', () => {
 
     it('should fail to create a note without a title', async () => {
       const res = await request(app)
-        .post('/api/note')
+        .post('/api/v1/note')
         .set('Authorization', `Bearer ${token}`)
         .send({ description: 'Note without title' });
 
@@ -55,10 +55,10 @@ describe('API Tests', () => {
   });
 
 
-  describe('GET /api/note', () => {
+  describe('GET /api/v1/note', () => {
     it('should fetch all notes for the authenticated user', async () => {
       const res = await request(app)
-        .get('/api/note')
+        .get('/api/v1/note')
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(HttpStatus.OK);
       expect(res.body.message).toBeInstanceOf(Array);

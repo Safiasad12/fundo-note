@@ -15,7 +15,7 @@ noteRouter.get('/', userAuth, cacheNotesByUserId, getUserNotes);
 
 noteRouter.get('/search', userAuth, search);
 
-noteRouter.get('/:id', userAuth, getNote);
+noteRouter.get('/:id', userAuth, cacheNotesByUserId, getNote);
 
 noteRouter.put('/:id', userAuth, validateUpdateNote, updateNote);
 

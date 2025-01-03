@@ -17,8 +17,6 @@ const userAuth = async (
     }
     bearerToken = bearerToken.split(' ')[1];
 
-    // console.log(bearerToken)
-
     const secret = process.env.JWT_SECRET_TOKEN as string;
     const decoded: any = verifyJwt(bearerToken, secret);
 

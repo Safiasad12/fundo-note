@@ -20,6 +20,7 @@ export const getNoteById = async (noteId: string, userId: any): Promise<INote | 
     if (!note || Object.keys(note).length===0) {
       return null;
     }
+    await redisClient.setEx(`notes:${userId}`, 60, JSON.stringify(note));
     return note;
   } catch (error) {
     console.error('Error in getNoteById:', error);
