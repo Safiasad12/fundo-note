@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { userRegister, userLogin, userRefreshToken, userForgotPassword } from '../services/user.service';
+import { userRegister, userLogin, userRefreshToken, userForgotPassword, userResetPassword } from '../services/user.service';
 import HttpStatus from "http-status-codes";
 
 
@@ -52,3 +52,22 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
     });
   }
 };
+
+export async function resetPassword(req: Request, res: Response, next: NextFunction): Promise<any> {
+  try {
+    await userResetPassword(req.body, req.body.createdBy);
+
+    res.status(HttpStatus.OK).json({
+      code: HttpStatus.OK,
+      message: 'Password reset successfully',
+    });
+  } catch (error: any) {
+    res.status(HttpStatus.UNAUTHORIZED).send({
+      code: HttpStatus.UNAUTHORIZED,
+      message: error.message,
+    });
+  }
+}
+
+
+

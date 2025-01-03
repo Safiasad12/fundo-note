@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
 import UserModel from '../models/user.model';
-import jwt from 'jsonwebtoken';
 import { sendEmail } from '../utils/user.util'
 import { generateJwt, verifyJwt } from '../utils/jwtUtils';
 import { ObjectId } from 'mongoose';
@@ -49,10 +48,10 @@ export const userRefreshToken = async (credentials: { refreshtoken: string }): P
   }
 
   try {
-    const decoded = (await verifyJwt(
+    const decoded: any = verifyJwt(
       credentials.refreshtoken,
       `${process.env.JWT_REFRESH_SECRET_TOKEN}`
-    )) as { userId: string; email: string };
+    )
 
     const user = await UserModel.findOne({
       _id: decoded.userId,
@@ -77,7 +76,7 @@ export const userForgotPassword = async (email: string) => {
     const user = await UserModel.findOne({ email });
     if (!user) throw new Error('Email not found');
 
-    const token = generateJwt(user._id as ObjectId, user.email, `${ process.env.JWT_FORGOTPASSWORD}`, '1h');
+    const token = generateJwt(user._id as ObjectId, user.email, `${ process.env.JWT_SECRET_TOKEN}`, '1d');
     await sendEmail(email, token);
   } catch (error: any) {
     throw new Error(`Error: ${error.message}`);
@@ -86,4 +85,19 @@ export const userForgotPassword = async (email: string) => {
 
 
 
+export async function userResetPassword(body: any, userId: string): Promise<void> {
+  console.log(userId);
+  const user = await UserModel.findById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
 
+  try {
+    const hashedPassword = await bcrypt.hash(body.newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    throw new Error('An error occurred while resetting the password.');
+  }
+}

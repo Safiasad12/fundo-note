@@ -15,17 +15,7 @@ export const generateJwt = (userId: ObjectId, email: string, secretKey: string, 
   }
 };
 
-export const verifyJwt = (token: string, secretKey: string): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    jwt.verify(token, secretKey, (error, decoded) => {
-      if (error) {
-        if (error instanceof Error) {
-          return reject(new Error(`Invalid token: ${error.message}`));
-        } else {
-          return reject(new Error('Invalid token: An unknown error occurred'));
-        }
-      }
-      resolve(decoded);
-    });
-  });
-};
+export const verifyJwt = (token: string, secretKey: string) => {
+    const data = jwt.verify(token, secretKey);
+    return data;
+}
