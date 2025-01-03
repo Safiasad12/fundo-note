@@ -1,6 +1,6 @@
 import express from "express";
 import userAuth from '../middlewares/auth.middleware';
-import { create, getNote,getUserNotes,updateNote,deletePermanently,toggleArchive,toggleTrash } from '../controllers/note.controller'
+import { create, getNote, getUserNotes, updateNote, deletePermanently, toggleArchive, toggleTrash } from '../controllers/note.controller'
 import { validateNote, validateUpdateNote } from "../validation/note.validation";
 
 const noteRouter = express.Router();

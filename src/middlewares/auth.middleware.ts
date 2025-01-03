@@ -18,7 +18,7 @@ const userAuth = async (
     bearerToken = bearerToken.split(' ')[1];
 
     const secret = process.env.JWT_SECRET_TOKEN as string;
-    const decoded: any = await jwt.verify(bearerToken, secret);
+    const decoded: any = jwt.verify(bearerToken, secret);
 
     req.body.createdBy = decoded.userId;
     next();
