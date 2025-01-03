@@ -2,14 +2,16 @@
 import express from 'express';
 import connectDB from './config/db.config';
 import dotenv from 'dotenv';
-import logger from './config/logger';
+import logger from './utils/logger';
 import morgan from 'morgan';
 import userRouter from './routes/user.routes';
+
 
 dotenv.config(); 
 const app = express();
 const PORT = process.env.PORT;
 
+app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
 connectDB();

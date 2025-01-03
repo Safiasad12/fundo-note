@@ -1,23 +1,25 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 
-const userAuthorization = (req: Request, res: Response, next: NextFunction): void=> {
-  const authHeader = req.headers["token-key"];
-
-  if (!authHeader) {
-    res.status(401).json({ message: 'Authorization header is missing' });
-  }
-  let token = null;
-  if(typeof authHeader === 'string'){
-    token = authHeader.split(' ')[1]; 
-  }
-  if (!token) {
-    res.status(401).json({ message: 'Token is missing' });
-  }
-
+const userAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const decoded = jwt.verify(`${token}`, `${process.env.JWT_SECRET_TOKEN}`); 
-    (req as any).body.user = decoded;
+    let bearerToken = req.header('Authorization');
+    if (!bearerToken) {
+      throw {
+        code: HttpStatus.BAD_REQUEST,
+        message: 'Authorization token is required',
+      };
+    }
+    bearerToken = bearerToken.split(' ')[1];
+
+    const secret = process.env.JWT_SECRET_TOKEN as string;
+    const decoded: any = jwt.verify(bearerToken, secret);
+
+    req.body.createdBy = decoded.userId;
     next();
   } catch (err) {
       next(err);
