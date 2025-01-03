@@ -1,3 +1,4 @@
+import HttpStatus from 'http-status-codes';
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 
@@ -21,9 +22,9 @@ const userAuth = async (
 
     req.body.createdBy = decoded.userId;
     next();
-  } catch (err) {
-      next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
-export default userAuthorization;
+export default userAuth;
