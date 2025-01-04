@@ -6,6 +6,8 @@ import logger from './utils/logger';
 import morgan from 'morgan';
 import userRouter from './routes/user.routes';
 import noteRouter from './routes/note.routes';
+import swaggerUi from 'swagger-ui-express';
+import * as swaggerDocument from './swagger.json';
 
 
 
@@ -36,6 +38,8 @@ app.use(morgan(morganFormate, {
 
 app.use('/api/user', userRouter);
 app.use('/api/note', noteRouter);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

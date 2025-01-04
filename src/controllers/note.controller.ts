@@ -14,11 +14,11 @@ export const create = async (req: Request, res: Response, next: NextFunction): P
 
   } catch (error) {
     console.error(`Cannot create note:`, error);
-    next({
-      code: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: "Failed to create note",
-      error: (error as Error).message,
-    });
+    // next({
+    //   code: HttpStatus.INTERNAL_SERVER_ERROR,
+    //   message: "Failed to create note",
+    //   error: (error as Error).message,
+    // });
   }
 };
 
@@ -63,8 +63,9 @@ export const updateNote = async (req: Request, res: Response, next: NextFunction
     const noteId = req.params.id;
     const userId = req.body.createdBy;
     const updateData = req.body;
-    await updateNoteById(noteId, userId, updateData);
-
+    const temp = await updateNoteById(noteId, userId, updateData);
+    console.log(temp);
+   
     res.status(HttpStatus.OK).json({
       code: HttpStatus.OK,
       message: 'Note updated',

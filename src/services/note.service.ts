@@ -1,5 +1,7 @@
 import { INote } from '../interface/note.interface';
 import Note from '../models/note.model';
+import ObjectId from 'mongoose'
+import mongoose from 'mongoose';
 
 export const createNote = async (body: INote): Promise<INote> => {
   try {
@@ -37,6 +39,9 @@ export const getNotesByUserId = async (userId: string): Promise<{ data: INote[],
 
 export const updateNoteById = async (noteId: string, userId: any, updatedData: any): Promise<INote | null> => {
   try {
+    
+    updatedData.title = updatedData.newTitle;
+    updatedData.description = updatedData.newDescription;
     const note = await Note.findOneAndUpdate(
       { _id: noteId, createdBy: userId},
       { $set: updatedData },
@@ -46,7 +51,6 @@ export const updateNoteById = async (noteId: string, userId: any, updatedData: a
     if (!note) {
       throw new Error('Note not found or unauthorized');
     }
-
     return note;
   } catch (error) {
     throw error;
@@ -62,7 +66,7 @@ export const deletePermanentlyById = async (noteId: string, userId: any): Promis
     }
 
     await Note.findByIdAndDelete(noteId);
-
+    
     return true;
   } catch (error) {
     throw error;

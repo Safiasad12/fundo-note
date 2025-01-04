@@ -76,6 +76,7 @@ export const userForgotPassword = async (email: string) => {
     const user = await UserModel.findOne({ email });
     if (!user) throw new Error('Email not found');
 
+
     const token = generateJwt(user._id as ObjectId, user.email, `${ process.env.JWT_SECRET_TOKEN}`, '1d');
     await sendEmail(email, token);
   } catch (error: any) {
