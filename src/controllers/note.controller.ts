@@ -44,7 +44,9 @@ export const getNote = async (req: Request, res: Response, next: NextFunction): 
 export const getUserNotes = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.body.createdBy;
-    const { data: notes, source } = await getNotesByUserId(userId);
+    const page = req.query.page ? parseInt(req.query.page as string) : 1;
+  
+    const { data: notes, source } = await getNotesByUserId(userId, page);
 
     res.status(HttpStatus.OK).json({ message: source, notes });
   } catch (error) {

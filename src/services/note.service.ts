@@ -25,13 +25,29 @@ export const getNoteById = async (noteId: string, userId: any): Promise<INote | 
   }
 };
 
-export const getNotesByUserId = async (userId: string): Promise<{ data: INote[], source: string }> => {
+export const getNotesByUserId = async (userId: string, page: number): Promise<{ data: INote[], source: string }> => {
   try {
-    const notes = await Note.find({ createdBy: userId });
-    if (!notes || notes.length === 0) {
-      throw new Error('No notes found for this user');
+    const perPage = 1;
+    const totalNotes = await Note.countDocuments({createdBy:userId});
+    const totalPages = Math.ceil(totalNotes/perPage);
+    if(page>totalPages){
+      throw new Error('page not found');
     }
+
+    const notes= await Note.find({createdBy: userId})
+    .skip((page-1)*perPage)
+    .limit(perPage)
+    .exec();
+
+    // const notes = await Note.find({ createdBy: userId });
+    // if (!notes || notes.length === 0) {
+    //   throw new Error('No notes found for this user');
+    // }
+
+   
+  
     return { data: notes, source: 'Data retrieved from database' };
+    
   } catch (error) {
     throw error;
   }
