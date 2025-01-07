@@ -23,7 +23,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
       refreshtoken: data.refreshtoken
     });
   } catch (error) {
-    next();
+    next(error);
   }
 };
 

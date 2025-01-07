@@ -1,8 +1,7 @@
-// utils/jwtUtils.ts
 import jwt from 'jsonwebtoken';
 import { ObjectId } from 'mongoose';
 
-export const generateJwt = (userId: ObjectId, email: string, secretKey: string, expiresIn: string): string => {
+export const  generateJwt = (userId: ObjectId, email: string, secretKey: string, expiresIn: string): string => {
   try {
     const token = jwt.sign({ userId, email }, secretKey, { expiresIn });
     return token;

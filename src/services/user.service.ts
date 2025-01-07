@@ -25,12 +25,12 @@ export const userLogin = async (credentials: { email: string; password: string }
   const user = await UserModel.findOne({ email: credentials.email });
 
   if (!user) {
-    throw new Error('Invalid email or password');
+    throw new Error('Invalid email');
   }
 
   const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
   if (!isPasswordValid) {
-    throw new Error('Invalid email or password');
+    throw new Error('Invalid password');
   }
 
   const token = generateJwt(user._id as ObjectId, user.email, `${process.env.JWT_SECRET_TOKEN}`, '1d');

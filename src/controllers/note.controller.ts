@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import HttpStatus from "http-status-codes";
-import { createNote, getNoteById, getNotesByUserId, updateNoteById, deletePermanentlyById, toggleArchiveById, toggleTrashById } from "../services/note.service";
+import { createNote, getNoteById, getNotesByUserId, updateNoteById, deletePermanentlyById, toggleArchiveById, toggleTrashById, searchNotesService } from "../services/note.service";
 
 
 export const create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -14,11 +14,11 @@ export const create = async (req: Request, res: Response, next: NextFunction): P
 
   } catch (error) {
     console.error(`Cannot create note:`, error);
-    // next({
-    //   code: HttpStatus.INTERNAL_SERVER_ERROR,
-    //   message: "Failed to create note",
-    //   error: (error as Error).message,
-    // });
+    next({
+      code: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: "Failed to create note",
+      error: (error as Error).message,
+    });
   }
 };
 
@@ -29,7 +29,14 @@ export const getNote = async (req: Request, res: Response, next: NextFunction): 
 
     const note = await getNoteById(noteId, userId);
 
+    if (!note) {
+      res.status(HttpStatus.NOT_FOUND).json({
+        message: 'Note not found',
+      });
+    }
+
     res.status(HttpStatus.OK).json(note);
+
   } catch (error) {
     console.error('Error retrieving note:', error);
 
@@ -44,11 +51,18 @@ export const getNote = async (req: Request, res: Response, next: NextFunction): 
 export const getUserNotes = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.body.createdBy;
+
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
   
-    const { data: notes, source } = await getNotesByUserId(userId, page);
+    const { data: notes } = await getNotesByUserId(userId, page);
 
-    res.status(HttpStatus.OK).json({ message: source, notes });
+    if(!notes){
+      res.status(HttpStatus.NOT_FOUND).json({
+        message : 'Note not found',
+      });
+    }
+
+    res.status(HttpStatus.OK).json({ message:  notes });
   } catch (error) {
     console.error('Error retrieving notes:', error);
 
@@ -87,7 +101,10 @@ export const deletePermanently = async (req: Request, res: Response, next: NextF
     const noteId = req.params.id;
     const userId = req.body.createdBy;
 
+
     await deletePermanentlyById(noteId, userId);
+
+    console.log(userId);
 
     res.status(HttpStatus.OK).json({
       code: HttpStatus.OK,
@@ -147,5 +164,27 @@ export const toggleTrash = async (req: Request, res: Response, next: NextFunctio
 };
 
 
+export const searchNotes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { title } = req.query; // Get title from query string
 
+    if (!title) {
+      res.status(HttpStatus.BAD_REQUEST).json({
+        message: 'Title query parameter is required.',
+      });
+      return;
+    }
 
+    // Call the searchNotesService to handle the logic
+    const { status, notes, message } = await searchNotesService(title as string, req.body.createdBy);
+
+    if (status === HttpStatus.NOT_FOUND) {
+      res.status(HttpStatus.NOT_FOUND).json({ message });
+      return;
+    }
+
+    res.status(status).json({ notes });
+  } catch (error) {
+    next(error);
+  }
+};

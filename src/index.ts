@@ -12,11 +12,13 @@ import * as swaggerDocument from './swagger.json';
 
 
 dotenv.config(); 
+
 const app = express();
 const PORT = process.env.PORT;
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
+
 
 connectDB();
 
@@ -44,3 +46,5 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+export default app;

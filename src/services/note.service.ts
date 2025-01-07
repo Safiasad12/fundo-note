@@ -1,7 +1,7 @@
 import { INote } from '../interface/note.interface';
 import Note from '../models/note.model';
-import ObjectId from 'mongoose'
-import mongoose from 'mongoose';
+import HttpStatus from "http-status-codes";
+
 
 export const createNote = async (body: INote): Promise<INote> => {
   try {
@@ -15,8 +15,8 @@ export const createNote = async (body: INote): Promise<INote> => {
 export const getNoteById = async (noteId: string, userId: any): Promise<INote | null> => {
   try {
     const note = await Note.findOne({ _id: noteId , createdBy: userId });
-    if (!note) {
-      throw new Error('Note not found');
+    if (!note || Object.keys(note).length===0) {
+      return null;
     }
     return note;
   } catch (error) {
@@ -25,19 +25,25 @@ export const getNoteById = async (noteId: string, userId: any): Promise<INote | 
   }
 };
 
-export const getNotesByUserId = async (userId: string, page: number): Promise<{ data: INote[], source: string }> => {
+export const getNotesByUserId = async (userId: string, page: number): Promise<{data: INote[]} | {data: null}> => {
   try {
-    const perPage = 1;
+    const perPage = 10;
     const totalNotes = await Note.countDocuments({createdBy:userId});
     const totalPages = Math.ceil(totalNotes/perPage);
     if(page>totalPages){
-      throw new Error('page not found');
+      return {data: null};
     }
 
     const notes= await Note.find({createdBy: userId})
     .skip((page-1)*perPage)
     .limit(perPage)
     .exec();
+
+    
+   
+
+    // console.log(notes);
+ 
 
     // const notes = await Note.find({ createdBy: userId });
     // if (!notes || notes.length === 0) {
@@ -46,7 +52,7 @@ export const getNotesByUserId = async (userId: string, page: number): Promise<{ 
 
    
   
-    return { data: notes, source: 'Data retrieved from database' };
+    return {data: notes};
     
   } catch (error) {
     throw error;
@@ -108,7 +114,7 @@ export const toggleArchiveById = async (noteId: string, userId: any): Promise<IN
 
 export const toggleTrashById = async (noteId: string, userId: any): Promise<INote | null> => {
   try {
-    const note = await Note.findOne({_id: noteId ,createdBy: userId });
+    const note = await Note.findOne({_id: noteId, createdBy: userId });
     if (!note) {
       throw new Error('Note not found or user not authorized');
     }
@@ -121,5 +127,26 @@ export const toggleTrashById = async (noteId: string, userId: any): Promise<INot
   } catch (error) {
     console.error('Error in toggleTrash:', error);
     throw error;
+  }
+};
+
+
+export const searchNotesService = async (title: string, userId: string) => {
+  try {
+    const searchQuery = { 
+      title: { $regex: title, $options: 'i' }, 
+      createdBy: userId 
+    };
+
+    // Search notes by title and userId
+    const notes = await Note.find(searchQuery);
+
+    if (notes.length === 0) {
+      return { status: HttpStatus.NOT_FOUND, message: 'No notes found matching the search criteria.' };
+    }
+
+    return { status: HttpStatus.OK, notes };
+  } catch (error) {
+    throw { status: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error searching notes.' };
   }
 };

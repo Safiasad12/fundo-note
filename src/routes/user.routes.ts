@@ -13,6 +13,6 @@ userRouter.post('/refreshtoken', refreshtoken);
 
 userRouter.post('/forgot-password', forgotPassword);
 
-userRouter.post('/reset-password',userAuth, resetPassword);
+userRouter.post('/reset-password', userAuth, resetPassword);
 
 export default userRouter;  
