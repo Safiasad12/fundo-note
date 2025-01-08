@@ -1,11 +1,13 @@
 import { INote } from '../interface/note.interface';
 import Note from '../models/note.model';
 import HttpStatus from "http-status-codes";
+import redisClient from '../config/redis.config';
 
 
 export const createNote = async (body: INote): Promise<INote> => {
   try {
     const newNote = await Note.create(body);
+    await redisClient.del(`notes:${body.createdBy}`);
     return newNote;
   } catch (error) {
     throw new Error('Error creating note');
@@ -50,7 +52,7 @@ export const getNotesByUserId = async (userId: string, page: number): Promise<{d
     //   throw new Error('No notes found for this user');
     // }
 
-   
+    await redisClient.setEx(`notes:${userId}`, 60, JSON.stringify(notes));
   
     return {data: notes};
     
@@ -65,7 +67,7 @@ export const updateNoteById = async (noteId: string, userId: any, updatedData: a
     updatedData.title = updatedData.newTitle;
     updatedData.description = updatedData.newDescription;
     const note = await Note.findOneAndUpdate(
-      { _id: noteId, createdBy: userId},
+      { _id: noteId, createdBy: userId, isTrash: false },
       { $set: updatedData },
       { new: true }
     );
@@ -73,6 +75,9 @@ export const updateNoteById = async (noteId: string, userId: any, updatedData: a
     if (!note) {
       throw new Error('Note not found or unauthorized');
     }
+
+    await redisClient.del(`notes:${userId}`);
+
     return note;
   } catch (error) {
     throw error;
@@ -88,8 +93,11 @@ export const deletePermanentlyById = async (noteId: string, userId: any): Promis
     }
 
     await Note.findByIdAndDelete(noteId);
+
+    await redisClient.del(`notes:${userId}`);
     
     return true;
+    
   } catch (error) {
     throw error;
   }
@@ -97,7 +105,7 @@ export const deletePermanentlyById = async (noteId: string, userId: any): Promis
 
 export const toggleArchiveById = async (noteId: string, userId: any): Promise<INote | null> => {
   try {
-    const note = await Note.findOne({ _id: noteId , createdBy: userId }); 
+    const note = await Note.findOne({$and: [{ _id: noteId }, { createdBy: userId }, { isTrash: false }]}); 
     
     if (!note) {
       throw new Error('Note not found or user not authorized'); 
@@ -105,6 +113,9 @@ export const toggleArchiveById = async (noteId: string, userId: any): Promise<IN
     
     note.isArchive = !note.isArchive; 
     await note.save();
+
+    await redisClient.del(`notes:${userId}`);
+
     return note;
   } catch (error) {
     console.error('Error in toggleArchive:', error); 
@@ -123,6 +134,9 @@ export const toggleTrashById = async (noteId: string, userId: any): Promise<INot
       note.isArchive = false;
     }
     await note.save(); 
+
+    await redisClient.del(`notes:${userId}`);
+
     return note;
   } catch (error) {
     console.error('Error in toggleTrash:', error);
@@ -131,14 +145,13 @@ export const toggleTrashById = async (noteId: string, userId: any): Promise<INot
 };
 
 
-export const searchNotesService = async (title: string, userId: string) => {
+export const searchNotes = async (title: string, userId: string) => {
   try {
     const searchQuery = { 
       title: { $regex: title, $options: 'i' }, 
       createdBy: userId 
     };
 
-    // Search notes by title and userId
     const notes = await Note.find(searchQuery);
 
     if (notes.length === 0) {

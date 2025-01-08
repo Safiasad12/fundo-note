@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import HttpStatus from "http-status-codes";
-import { createNote, getNoteById, getNotesByUserId, updateNoteById, deletePermanentlyById, toggleArchiveById, toggleTrashById, searchNotesService } from "../services/note.service";
+import { createNote, getNoteById, getNotesByUserId, updateNoteById, deletePermanentlyById, toggleArchiveById, toggleTrashById, searchNotes } from "../services/note.service";
 
 
 export const create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -164,7 +164,7 @@ export const toggleTrash = async (req: Request, res: Response, next: NextFunctio
 };
 
 
-export const searchNotes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const search = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { title } = req.query; // Get title from query string
 
@@ -176,7 +176,7 @@ export const searchNotes = async (req: Request, res: Response, next: NextFunctio
     }
 
     // Call the searchNotesService to handle the logic
-    const { status, notes, message } = await searchNotesService(title as string, req.body.createdBy);
+    const { status, notes, message } = await searchNotes(title as string, req.body.createdBy);
 
     if (status === HttpStatus.NOT_FOUND) {
       res.status(HttpStatus.NOT_FOUND).json({ message });
