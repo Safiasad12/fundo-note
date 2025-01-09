@@ -4,10 +4,7 @@ import connectDB from './config/db.config';
 import dotenv from 'dotenv';
 import logger from './utils/logger';
 import morgan from 'morgan';
-import userRouter from './routes/user.routes';
-import noteRouter from './routes/note.routes';
-import swaggerUi from 'swagger-ui-express';
-import * as swaggerDocument from './swagger.json';
+import * as router from "./routes/index.routes";
 
 
 
@@ -38,10 +35,7 @@ app.use(morgan(morganFormate, {
   }
 }));
 
-app.use('/api/user', userRouter);
-app.use('/api/note', noteRouter);
-
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api/v1', router.handleRouter());
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
