@@ -166,8 +166,7 @@ export const toggleTrash = async (req: Request, res: Response, next: NextFunctio
 
 export const search = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { title } = req.query; // Get title from query string
-
+    const { title } = req.query; 
     if (!title) {
       res.status(HttpStatus.BAD_REQUEST).json({
         message: 'Title query parameter is required.',
@@ -175,7 +174,6 @@ export const search = async (req: Request, res: Response, next: NextFunction): P
       return;
     }
 
-    // Call the searchNotesService to handle the logic
     const { status, notes, message } = await searchNotes(title as string, req.body.createdBy);
 
     if (status === HttpStatus.NOT_FOUND) {

@@ -13,7 +13,7 @@ export const cacheNotesByUserId = async (req: Request, res: Response, next: Next
         notes: JSON.parse(cachedNotes)
       });
     }
-    next();
+    next(); 
   } catch (error) {
     logger.error(`Error in Redis middleware: ${error}`);
     next(error);

@@ -41,17 +41,6 @@ export const getNotesByUserId = async (userId: string, page: number): Promise<{d
     .limit(perPage)
     .exec();
 
-    
-   
-
-    // console.log(notes);
- 
-
-    // const notes = await Note.find({ createdBy: userId });
-    // if (!notes || notes.length === 0) {
-    //   throw new Error('No notes found for this user');
-    // }
-
     await redisClient.setEx(`notes:${userId}`, 60, JSON.stringify(notes));
   
     return {data: notes};

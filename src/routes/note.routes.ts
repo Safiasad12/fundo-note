@@ -7,11 +7,13 @@ import { cacheNotesByUserId } from '../middlewares/redis.middleware';
 
 const noteRouter = express.Router();
 
-noteRouter.get('/search', userAuth, search);
+
 
 noteRouter.post('/', validateNote, userAuth, create);
 
 noteRouter.get('/', userAuth, cacheNotesByUserId, getUserNotes);
+
+noteRouter.get('/search', userAuth, search);
 
 noteRouter.get('/:id', userAuth, getNote);
 

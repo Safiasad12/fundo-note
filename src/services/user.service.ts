@@ -3,6 +3,7 @@ import UserModel from '../models/user.model';
 import { sendEmail } from '../utils/user.util'
 import { generateJwt, verifyJwt } from '../utils/jwtUtils';
 import { ObjectId } from 'mongoose';
+import { connectRabbitMQ } from '../utils/rabbitmq';
 
 export const userRegister = async (userData: { username: string; email: string; password: string }): Promise<any> => {
 
@@ -16,6 +17,11 @@ export const userRegister = async (userData: { username: string; email: string; 
 
 
   const user = new UserModel({ ...userData, password: hashedPassword });
+
+  const { sendToExchange } = await connectRabbitMQ();
+  await sendToExchange('userExchange', 'userRoutingKey', user);
+
+ 
   await user.save();
   return user;
 };
