@@ -4,6 +4,7 @@ export interface INote extends Document {
   title: string;
   description: string;
   createdBy:string;
-  isArchive:boolean;
-  isTrash:boolean;
+  isArchive?:boolean;
+  isTrash?:boolean;
+  color?:String;
 }

@@ -4,17 +4,28 @@ import connectDB from './config/db.config';
 import dotenv from 'dotenv';
 import logger from './utils/logger';
 import morgan from 'morgan';
-import userRouter from './routes/user.routes';
-import noteRouter from './routes/note.routes';
+import * as router from "./routes/index.routes";
+import cors from 'cors';
+import {ErrorMiddleware} from './middlewares/error.middleware'
+
 
 
 
 dotenv.config(); 
+
 const app = express();
 const PORT = process.env.PORT;
+const errorHandler = new ErrorMiddleware();
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
+
+app.use(
+  cors({
+    origin: "http://localhost:4200",
+  })
+)
+
 
 connectDB();
 
@@ -34,9 +45,13 @@ app.use(morgan(morganFormate, {
   }
 }));
 
-app.use('/api/user', userRouter);
-app.use('/api/note', noteRouter);
+app.use('/api/v1', router.handleRouter());
+
+app.use(errorHandler.ErrorHandler);
+app.use(errorHandler.notFound);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+export default app;

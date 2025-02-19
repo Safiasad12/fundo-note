@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import HttpStatus from "http-status-codes";
-import { createNote, getNoteById, getNotesByUserId, updateNoteById, deletePermanentlyById, toggleArchiveById, toggleTrashById } from "../services/note.service";
+import { createNote, getNoteById, getNotesByUserId, updateNoteById, deletePermanentlyById, toggleArchiveById, toggleTrashById, searchNotes, changeColorService } from "../services/note.service";
 
 
 export const create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -29,7 +29,14 @@ export const getNote = async (req: Request, res: Response, next: NextFunction): 
 
     const note = await getNoteById(noteId, userId);
 
+    if (!note) {
+      res.status(HttpStatus.NOT_FOUND).json({
+        message: 'Note not found',
+      });
+    }
+
     res.status(HttpStatus.OK).json(note);
+
   } catch (error) {
     console.error('Error retrieving note:', error);
 
@@ -44,9 +51,18 @@ export const getNote = async (req: Request, res: Response, next: NextFunction): 
 export const getUserNotes = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.body.createdBy;
-    const { data: notes, source } = await getNotesByUserId(userId);
 
-    res.status(HttpStatus.OK).json({ message: source, notes });
+    const page = req.query.page ? parseInt(req.query.page as string) : 1;
+  
+    const { data: notes } = await getNotesByUserId(userId, page);
+
+    if(!notes){
+      res.status(HttpStatus.NOT_FOUND).json({
+        message : 'Note not found',
+      });
+    }
+
+    res.status(HttpStatus.OK).json({ notes:  notes });
   } catch (error) {
     console.error('Error retrieving notes:', error);
 
@@ -63,8 +79,9 @@ export const updateNote = async (req: Request, res: Response, next: NextFunction
     const noteId = req.params.id;
     const userId = req.body.createdBy;
     const updateData = req.body;
-    await updateNoteById(noteId, userId, updateData);
-
+    const temp = await updateNoteById(noteId, userId, updateData);
+    console.log(temp);
+   
     res.status(HttpStatus.OK).json({
       code: HttpStatus.OK,
       message: 'Note updated',
@@ -84,7 +101,10 @@ export const deletePermanently = async (req: Request, res: Response, next: NextF
     const noteId = req.params.id;
     const userId = req.body.createdBy;
 
+
     await deletePermanentlyById(noteId, userId);
+
+    console.log(userId);
 
     res.status(HttpStatus.OK).json({
       code: HttpStatus.OK,
@@ -144,5 +164,49 @@ export const toggleTrash = async (req: Request, res: Response, next: NextFunctio
 };
 
 
+export const search = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { title } = req.query; 
+    if (!title) {
+      res.status(HttpStatus.BAD_REQUEST).json({
+        message: 'Title query parameter is required.',
+      });
+      return;
+    }
+
+    const { status, notes, message } = await searchNotes(title as string, req.body.createdBy);
+
+    if (status === HttpStatus.NOT_FOUND) {
+      res.status(HttpStatus.NOT_FOUND).json({ message });
+      return;
+    }
+
+    res.status(status).json({ notes });
+  } catch (error) {
+    next(error);
+  }
+};
 
 
+export const changeColor = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const noteId = req.params.id;
+    const color = req.body.color;
+    const userId = req.body.createdBy;
+    const note = await changeColorService(noteId, userId, color);
+    if (note) {
+      res.status(HttpStatus.OK).json({
+        message: `${note.color} color is saved in database`,
+
+      });
+    }
+  } catch (error) {
+    console.error('Error changing color status:', error);
+    next({
+      code: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: 'Error changing color status',
+      error: (error as Error).message
+    });
+  }
+
+}

@@ -1,5 +1,5 @@
 import HttpStatus from 'http-status-codes';
-import jwt from 'jsonwebtoken';
+import {verifyJwt} from '../utils/jwtUtils'
 import { Request, Response, NextFunction } from 'express';
 
 const userAuth = async (
@@ -18,7 +18,7 @@ const userAuth = async (
     bearerToken = bearerToken.split(' ')[1];
 
     const secret = process.env.JWT_SECRET_TOKEN as string;
-    const decoded: any = jwt.verify(bearerToken, secret);
+    const decoded: any = verifyJwt(bearerToken, secret);
 
     req.body.createdBy = decoded.userId;
     next();

@@ -2,6 +2,8 @@ import Joi from 'joi';
 import { Request, Response, NextFunction } from 'express';
 
  const registerValidation = Joi.object({
+  firstname: Joi.string().required(),
+  lastname: Joi.string().required(),
   username: Joi.string().required(),
   email: Joi.string().required(),
   password: Joi.string().required()
