@@ -5,7 +5,7 @@ import { generateJwt, verifyJwt } from '../utils/jwtUtils';
 import { ObjectId } from 'mongoose';
 import { connectRabbitMQ } from '../utils/rabbitmq';
 
-export const userRegister = async (userData: { firstname:string, lastname?: string, username: string; email: string; password: string }): Promise<any> => {
+export const userRegister = async (userData: { firstname:string, lastname: string, username: string; email: string; password: string }): Promise<any> => {
 
   const existingUser = await UserModel.findOne({ email: userData.email });
   if (existingUser) {
@@ -31,12 +31,13 @@ export const userLogin = async (credentials: { email: string; password: string }
   const user = await UserModel.findOne({ email: credentials.email });
 
   if (!user) {
-    throw new Error('Invalid email');
+    throw new Error('Invalid credentials');
   }
 
   const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+  
   if (!isPasswordValid) {
-    throw new Error('Invalid password');
+    throw new Error('Invalid credentials');
   }
 
   const token = generateJwt(user._id as ObjectId, user.email, `${process.env.JWT_SECRET_TOKEN}`, '1d');

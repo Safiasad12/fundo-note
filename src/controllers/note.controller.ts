@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import HttpStatus from "http-status-codes";
-import { createNote, getNoteById, getNotesByUserId, updateNoteById, deletePermanentlyById, toggleArchiveById, toggleTrashById, searchNotes } from "../services/note.service";
+import { createNote, getNoteById, getNotesByUserId, updateNoteById, deletePermanentlyById, toggleArchiveById, toggleTrashById, searchNotes, changeColorService } from "../services/note.service";
 
 
 export const create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -62,7 +62,7 @@ export const getUserNotes = async (req: Request, res: Response, next: NextFuncti
       });
     }
 
-    res.status(HttpStatus.OK).json({ message:  notes });
+    res.status(HttpStatus.OK).json({ notes:  notes });
   } catch (error) {
     console.error('Error retrieving notes:', error);
 
@@ -186,3 +186,27 @@ export const search = async (req: Request, res: Response, next: NextFunction): P
     next(error);
   }
 };
+
+
+export const changeColor = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const noteId = req.params.id;
+    const color = req.body.color;
+    const userId = req.body.createdBy;
+    const note = await changeColorService(noteId, userId, color);
+    if (note) {
+      res.status(HttpStatus.OK).json({
+        message: `${note.color} color is saved in database`,
+
+      });
+    }
+  } catch (error) {
+    console.error('Error changing color status:', error);
+    next({
+      code: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: 'Error changing color status',
+      error: (error as Error).message
+    });
+  }
+
+}

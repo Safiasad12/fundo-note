@@ -7,6 +7,7 @@ import redisClient from '../config/redis.config';
 export const createNote = async (body: INote): Promise<INote> => {
   try {
     const newNote = await Note.create(body);
+
     await redisClient.del(`notes:${body.createdBy}`);
     return newNote;
   } catch (error) {
@@ -30,7 +31,7 @@ export const getNoteById = async (noteId: string, userId: any): Promise<INote | 
 
 export const getNotesByUserId = async (userId: string, page: number): Promise<{data: INote[]} | {data: null}> => {
   try {
-    const perPage = 10;
+    const perPage = 1000;
     const totalNotes = await Note.countDocuments({createdBy:userId});
     const totalPages = Math.ceil(totalNotes/perPage);
     if(page>totalPages){
@@ -56,6 +57,7 @@ export const updateNoteById = async (noteId: string, userId: any, updatedData: a
     
     updatedData.title = updatedData.newTitle;
     updatedData.description = updatedData.newDescription;
+    updatedData.color = updatedData.color;
     const note = await Note.findOneAndUpdate(
       { _id: noteId, createdBy: userId, isTrash: false },
       { $set: updatedData },
@@ -67,6 +69,8 @@ export const updateNoteById = async (noteId: string, userId: any, updatedData: a
     }
 
     await redisClient.del(`notes:${userId}`);
+
+    console.log(note)
 
     return note;
   } catch (error) {
@@ -153,3 +157,24 @@ export const searchNotes = async (title: string, userId: string) => {
     throw { status: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error searching notes.' };
   }
 };
+
+
+export const changeColorService = async (noteId: string, userId: any, color: string) =>{
+  try{
+    const note = await Note.findOne({_id: noteId})
+    if (!note) {
+      throw new Error('Note not found');
+    }
+    note.color = color;
+
+    await note.save();
+    console.log(userId);
+    await redisClient.del(`notes:${userId}`);
+    
+    
+    return note;
+  }
+  catch(err){
+    console.log("Error in change color service", err);
+  }
+}

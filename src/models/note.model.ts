@@ -5,8 +5,9 @@ const NoteSchema: Schema = new Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   createdBy:{type: String},
-  isArchive:{type: Boolean, default: false},
-  isTrash:{type: Boolean, default: false}
+  isArchive:{type: Boolean},
+  isTrash:{type: Boolean, default: false},
+  color: {type: String, default: '#ffffff' }
 }, {
   timestamps: true,
 });

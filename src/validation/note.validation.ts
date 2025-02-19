@@ -3,7 +3,9 @@ import { Request, Response, NextFunction } from 'express';
 
 const noteValidation = Joi.object({
   title: Joi.string().required(),
-  description: Joi.string().required()
+  description: Joi.string().required(),
+  isArchive: Joi.boolean().optional(),
+  color: Joi.string().optional()
 });
 
 export const validateNote = (req: Request, res: Response, next: NextFunction): void => {
@@ -19,6 +21,7 @@ const updateNoteValidation = Joi.object({
   createdBy: Joi.string().required(),
   newTitle: Joi.string().optional(),
   newDescription: Joi.string().optional(),
+  color: Joi.string().optional()
 });
 
 export const validateUpdateNote = (req: Request, res: Response, next: NextFunction): void => {

@@ -493,6 +493,9 @@
           },
           "description": {
             "type": "string"
+          },
+          "color":{
+            "type": "string"
           }
         },
         "required": [
@@ -507,6 +510,9 @@
             "type": "string"
           },
           "newDescription": {
+            "type": "string"
+          },
+          "color":{
             "type": "string"
           }
         }
